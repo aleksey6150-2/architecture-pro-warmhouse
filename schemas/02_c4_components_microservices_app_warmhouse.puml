@@ -1,0 +1,22 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Диаграмма компонентов для управлениея устройствами (TO-BE)
+
+' Сервис мониторинга
+Container_Boundary(monitoring, "Monitoring Service - Java/Spring Boot") {
+    Component(condition_tracker, "Device condition tracker", "Spring REST Controller", "REST API для управления устройствами: CRUD операции, статус, конфигурация")
+    Component(sensor_client, "Sensor client", "http client", "Клиент для взаимодействия с датчиками")
+}
+
+' Сервис для выполнения заданий
+Container_Boundary("Async eventer", "Monitoring Service - Java/Spring Boot") {
+    Component("scheduler", "Device scheduler", "Spring boot scheduler", "Менеджер заданий по расписанию")
+    Component("task_condition", "task condition ", "http client", "Менеджер заданий по условию")
+}
+
+Container(api_gateway, "API Gateway", "Go", "Единая точка входа и маршрутизация")
+
+@enduml

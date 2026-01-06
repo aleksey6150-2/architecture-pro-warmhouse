@@ -1,0 +1,54 @@
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Диаграмма контейнеров микросервисной системы "Тёплый дом"
+
+Person(owner, "Владелец дома", "Владелец дома")
+Person(support, "Техподдержка, специалисты по подключению")
+
+Container(web_app, "Веб-приложение")
+Container(mobile_app, "Мобильное приложение")
+
+System_Boundary(warmhouse_platform, "Платформа «Теплый дом» - Микросервисная архитектура") {
+
+    Container(gateway, "Gateway для приложения")
+    Container(users, "Управление пользователями/авторизация")
+    ContainerDb(users_db, "Данные пользователей")
+    Container(billing, "Биллинг")
+    ContainerDb(billing_db, "Данные биллинга")
+    Container(monitoring, "Мониторинг объекта")
+    ContainerDb(monitoring_db, "DB мониторинга")
+    Container(devices, "Управление устройствами")
+    ContainerDb(devices_db, "DB устройств")
+    Container(async, "Асинхронное и событийное управление устройствами")
+    ContainerDb(async_db, "Данные/триггеры событийной обработки")
+}
+
+System_Ext(heating_controller, "Контроллеры отопления", "Реле управления (вкл и выкл) отоплением")
+System_Ext(temperature_sensors, "Датчики", "Датчики для измерения температуры в домах")
+
+Rel(owner, web_app, "браузер")
+Rel(owner, mobile_app, "мобильное устройство")
+Rel(support, web_app, "Личные кабинеты техподдержки")
+Rel(web_app, gateway, "Доступ к приложению")
+Rel(mobile_app, gateway, "Доступ к приложению")
+Rel(monitoring, temperature_sensors, "Снимает показания", "REST")
+Rel(monitoring, async, "сообщает об alert-событиях", "REST")
+Rel(async, devices, "Управляет датчиками")
+Rel(users, billing, "Управляет услугами")
+Rel(gateway, users, "Управляет данными пользователя/авторизация")
+Rel(gateway, devices, "Управляет услугами")
+Rel(gateway, billing, "Управляет услугами")
+Rel(gateway, monitoring, "Управляет услугами")
+
+Rel(users, users_db, "crud")
+Rel(billing, billing_db, "crud")
+Rel(devices, devices_db, "crud")
+Rel(monitoring, monitoring_db, "crud")
+Rel(async, async_db, "crud")
+
+Rel(devices, heating_controller, "Управление реле", "REST")
+Rel(devices, temperature_sensors, "Управление датчиками", "REST")
+
+@enduml

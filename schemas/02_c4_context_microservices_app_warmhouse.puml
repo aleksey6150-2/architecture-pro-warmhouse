@@ -1,0 +1,27 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+
+title Диаграмма контейнеров целевой микросервисной системы "Тёплый дом"
+
+Person(owner, "Владелец дома", "Владелец дома, управляющий отоплением")
+Person(worker, "Специалист по подключению", "Технический специалист, подключающий датчики")
+
+System(users, "Управление пользователями, подписками, биллинг")
+System(devices, "Управление устройствами")
+System(monitoring, "Мониторинг")
+
+System_Ext(heating_controller, "Контроллеры отопления", "Реле управления (вкл и выкл) отоплением")
+System_Ext(temperature_sensors, "Датчики", "Датчики для измерения температуры в домах")
+
+Rel(owner, users, "Подписки на услуги, доступ к функционалу", "rest")
+Rel(owner, monitoring, "Просматривает температуру", "rest")
+Rel(owner, devices, "Устанавливает датчики и заводит их в системе, управляет отоплением и прочими устройствами", "rest")
+Rel(monitoring, temperature_sensors, "Снимает показания", "REST")
+Rel(monitoring, devices, "сообщает об alert-событиях", "REST")
+
+Rel(devices, heating_controller, "Управление реле", "REST")
+Rel(devices, temperature_sensors, "Управление датчиками", "REST")
+
+@enduml
