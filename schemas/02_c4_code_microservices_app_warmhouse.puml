@@ -1,0 +1,102 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Диаграмма кода C4 для компонента "Мониторинг объектов"
+
+Container_Boundary(monitoring_api, "Monitoring API Component") {
+    Component(mon_controller, "MonitoringController", "REST Controller", "Обрабатывает HTTP запросы")
+    Component(mon_service, "MonitoringService", "Service", "Бизнес-логика мониторинга")
+}
+
+Container_Boundary(data_collector, "Data Collector Component") {
+    Component(sensor_client, "SensorClient", "HTTP Client", "Клиент для связи с датчиками")
+    Component(collector_scheduler, "CollectorScheduler", "Scheduler", "Планировщик сбора данных")
+    Component(data_validator, "DataValidator", "Validator", "Валидация данных с датчиков")
+    Component(data_mapper, "DataMapper", "Mapper", "Маппинг данных датчиков")
+}
+
+Container_Boundary(data_analyzer, "Data Analyzer Component") {
+    Component(temp_analyzer, "TemperatureAnalyzer", "Analyzer", "Анализ температурных данных")
+    Component(anomaly_detector, "AnomalyDetector", "Detector", "Обнаружение аномалий")
+    Component(statistics_calculator, "StatisticsCalculator", "Calculator", "Расчёт статистики")
+    Component(trend_analyzer, "TrendAnalyzer", "Analyzer", "Анализ трендов")
+}
+
+Container_Boundary(alert_generator, "Alert Generator Component") {
+    Component(alert_evaluator, "AlertEvaluator", "Evaluator", "Оценка условий алертов")
+    Component(alert_builder, "AlertBuilder", "Builder", "Создание алертов")
+    Component(alert_sender, "AlertSender", "Sender", "Отправка алертов")
+    Component(notification_formatter, "NotificationFormatter", "Formatter", "Форматирование уведомлений")
+}
+
+Container_Boundary(monitor_repository, "Monitor Repository Component") {
+    Component(reading_repo, "ReadingRepository", "JPA Repository", "Репозиторий показаний")
+    Component(alert_repo, "AlertRepository", "JPA Repository", "Репозиторий алертов")
+    Component(statistics_repo, "StatisticsRepository", "JPA Repository", "Репозиторий статистики")
+    Component(entity_mapper, "EntityMapper", "Mapper", "Маппинг entity/DTO")
+}
+
+Container_Boundary(domain_model, "Domain Model") {
+    Component(reading_entity, "Reading", "Entity", "Показание датчика")
+    Component(alert_entity, "Alert", "Entity", "Алерт")
+    Component(statistics_entity, "Statistics", "Entity", "Статистика")
+    Component(sensor_info, "SensorInfo", "Value Object", "Информация о датчике")
+}
+
+ComponentDb(monitoring_db, "Monitoring Database", "TimescaleDB", "БД мониторинга")
+
+System_Ext(temp_sensors, "Датчики температуры", "Внешние датчики")
+System_Ext(async_service, "Async Service", "Сервис событий")
+
+' Взаимодействие с API
+Rel(mon_controller, mon_service, "Вызывает", "Java")
+Rel(mon_service, collector_scheduler, "Управляет", "Java")
+Rel(mon_service, temp_analyzer, "Запрашивает анализ", "Java")
+Rel(mon_service, reading_repo, "Читает данные", "Java")
+
+' Data Collector
+Rel(collector_scheduler, sensor_client, "Инициирует сбор", "Java")
+Rel(sensor_client, temp_sensors, "HTTP GET", "REST/JSON")
+Rel(sensor_client, data_validator, "Передаёт данные", "Java")
+Rel(data_validator, data_mapper, "Валидные данные", "Java")
+Rel(data_mapper, reading_entity, "Создаёт", "Java")
+Rel(data_mapper, reading_repo, "Сохраняет", "Java")
+
+' Data Analyzer
+Rel(temp_analyzer, reading_repo, "Читает показания", "Java")
+Rel(temp_analyzer, anomaly_detector, "Проверяет аномалии", "Java")
+Rel(temp_analyzer, statistics_calculator, "Рассчитывает статистику", "Java")
+Rel(temp_analyzer, trend_analyzer, "Анализирует тренды", "Java")
+Rel(anomaly_detector, alert_evaluator, "Найдена аномалия", "Java")
+Rel(statistics_calculator, statistics_entity, "Создаёт", "Java")
+Rel(statistics_calculator, statistics_repo, "Сохраняет", "Java")
+
+' Alert Generator
+Rel(alert_evaluator, alert_builder, "Создаёт алерт", "Java")
+Rel(alert_builder, alert_entity, "Создаёт", "Java")
+Rel(alert_builder, alert_repo, "Сохраняет", "Java")
+Rel(alert_builder, notification_formatter, "Форматирует", "Java")
+Rel(notification_formatter, alert_sender, "Передаёт", "Java")
+Rel(alert_sender, async_service, "Отправляет событие", "REST/JSON")
+
+' Repository Layer
+Rel(reading_repo, entity_mapper, "Использует", "Java")
+Rel(alert_repo, entity_mapper, "Использует", "Java")
+Rel(statistics_repo, entity_mapper, "Использует", "Java")
+Rel(entity_mapper, reading_entity, "Маппит", "Java")
+Rel(entity_mapper, alert_entity, "Маппит", "Java")
+Rel(entity_mapper, statistics_entity, "Маппит", "Java")
+
+' Database
+Rel(reading_repo, monitoring_db, "CRUD", "JDBC/SQL")
+Rel(alert_repo, monitoring_db, "CRUD", "JDBC/SQL")
+Rel(statistics_repo, monitoring_db, "CRUD", "JDBC/SQL")
+
+' Domain references
+Rel(temp_analyzer, reading_entity, "Работает с", "Java")
+Rel(alert_evaluator, sensor_info, "Использует", "Java")
+Rel(data_mapper, sensor_info, "Создаёт", "Java")
+
+@enduml

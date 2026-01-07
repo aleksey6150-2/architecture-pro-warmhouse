@@ -1,22 +1,134 @@
 @startuml
-!pragma charset UTF-8
-skinparam defaultFontName "Segoe UI"
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
-title Диаграмма компонентов для управлениея устройствами (TO-BE)
+title Диаграмма компонентов C4 системы "Тёплый дом"
 
-' Сервис мониторинга
-Container_Boundary(monitoring, "Monitoring Service - Java/Spring Boot") {
-    Component(condition_tracker, "Device condition tracker", "Spring REST Controller", "REST API для управления устройствами: CRUD операции, статус, конфигурация")
-    Component(sensor_client, "Sensor client", "http client", "Клиент для взаимодействия с датчиками")
+Person(owner, "Владелец дома")
+Person(support, "Техподдержка")
+
+Container_Boundary(web_app, "Веб-приложение") {
+    Component(web_ui, "Web UI", "React", "Пользовательский интерфейс")
+    Component(web_auth, "Auth Module", "JavaScript", "Модуль аутентификации")
+    Component(web_api, "API Client", "Axios", "HTTP клиент")
 }
 
-' Сервис для выполнения заданий
-Container_Boundary("Async eventer", "Monitoring Service - Java/Spring Boot") {
-    Component("scheduler", "Device scheduler", "Spring boot scheduler", "Менеджер заданий по расписанию")
-    Component("task_condition", "task condition ", "http client", "Менеджер заданий по условию")
+Container_Boundary(mobile_app, "Мобильное приложение") {
+    Component(mobile_ui, "Mobile UI", "React Native", "Пользовательский интерфейс")
+    Component(mobile_auth, "Auth Module", "JavaScript", "Модуль аутентификации")
+    Component(mobile_api, "API Client", "Axios", "HTTP клиент")
 }
 
-Container(api_gateway, "API Gateway", "Go", "Единая точка входа и маршрутизация")
+Container_Boundary(gateway, "Gateway для приложения") {
+    Component(gw_router, "Request Router", "Node.js", "Маршрутизация запросов")
+    Component(gw_auth, "Auth Component", "JWT", "Проверка авторизации")
+    Component(gw_lb, "Load Balancer", "Nginx", "Балансировка нагрузки")
+}
+
+Container_Boundary(users, "Управление пользователями/авторизация") {
+    Component(user_auth, "Authentication", "Spring Security", "Аутентификация пользователей")
+    Component(user_mgmt, "Profile Management", "Java", "Управление профилями")
+    Component(user_api, "Users API", "REST", "API пользователей")
+    Component(user_repo, "User Repository", "JPA", "Доступ к БД")
+    ComponentDb(users_db, "Users DB", "PostgreSQL", "БД пользователей")
+}
+
+Container_Boundary(billing, "Биллинг") {
+    Component(bill_calc, "Billing Calculator", "Java", "Расчёт стоимости")
+    Component(bill_payment, "Payment Processor", "Java", "Обработка платежей")
+    Component(bill_api, "Billing API", "REST", "API биллинга")
+    Component(bill_repo, "Billing Repository", "JPA", "Доступ к БД")
+    ComponentDb(billing_db, "Billing DB", "PostgreSQL", "БД биллинга")
+}
+
+Container_Boundary(monitoring, "Мониторинг объекта") {
+    Component(mon_collector, "Data Collector", "Java", "Сборщик данных с датчиков")
+    Component(mon_analyzer, "Data Analyzer", "Java", "Анализ показаний")
+    Component(mon_alert, "Alert Generator", "Java", "Генератор алертов")
+    Component(mon_api, "Monitoring API", "REST", "API мониторинга")
+    Component(mon_repo, "Monitor Repository", "JPA", "Доступ к БД")
+    ComponentDb(monitoring_db, "Monitoring DB", "TimescaleDB", "БД мониторинга")
+}
+
+Container_Boundary(devices, "Управление устройствами") {
+    Component(dev_controller, "Device Controller", "Java", "Контроллер устройств")
+    Component(dev_registry, "Device Registry", "Java", "Реестр устройств")
+    Component(dev_api, "Devices API", "REST", "API устройств")
+    Component(dev_repo, "Device Repository", "JPA", "Доступ к БД")
+    ComponentDb(devices_db, "Devices DB", "PostgreSQL", "БД устройств")
+}
+
+Container_Boundary(async, "Асинхронное и событийное управление") {
+    Component(event_processor, "Event Processor", "Java", "Обработчик событий")
+    Component(event_queue, "Event Queue", "RabbitMQ", "Очередь событий")
+    Component(trigger_engine, "Trigger Engine", "Java", "Движок триггеров")
+    Component(async_api, "Async API", "REST", "API async")
+    Component(async_repo, "Async Repository", "JPA", "Доступ к БД")
+    ComponentDb(async_db, "Async DB", "PostgreSQL", "БД событий")
+}
+
+System_Ext(temp_sensors, "Датчики температуры", "Измерение температуры")
+System_Ext(heating_ctrl, "Контроллеры отопления", "Управление реле")
+
+Rel(owner, web_ui, "Использует")
+Rel(owner, mobile_ui, "Использует")
+Rel(support, web_ui, "Использует")
+
+Rel(web_ui, web_auth, "Аутентификация")
+Rel(web_ui, web_api, "Вызывает")
+Rel(mobile_ui, mobile_auth, "Аутентификация")
+Rel(mobile_ui, mobile_api, "Вызывает")
+
+Rel(web_api, gw_router, "HTTP/HTTPS")
+Rel(mobile_api, gw_router, "HTTP/HTTPS")
+
+Rel(gw_router, gw_auth, "Проверяет токен")
+Rel(gw_auth, gw_lb, "Передаёт запрос")
+
+Rel(gw_lb, user_api, "Маршрутизирует")
+Rel(gw_lb, bill_api, "Маршрутизирует")
+Rel(gw_lb, mon_api, "Маршрутизирует")
+Rel(gw_lb, dev_api, "Маршрутизирует")
+
+Rel(user_api, user_auth, "Использует")
+Rel(user_api, user_mgmt, "Использует")
+Rel(user_auth, user_repo, "Читает/пишет")
+Rel(user_mgmt, user_repo, "Читает/пишет")
+Rel(user_repo, users_db, "CRUD", "JDBC")
+
+Rel(bill_api, bill_calc, "Использует")
+Rel(bill_api, bill_payment, "Использует")
+Rel(bill_calc, bill_repo, "Читает/пишет")
+Rel(bill_payment, bill_repo, "Читает/пишет")
+Rel(bill_repo, billing_db, "CRUD", "JDBC")
+
+Rel(mon_api, mon_collector, "Использует")
+Rel(mon_api, mon_analyzer, "Использует")
+Rel(mon_collector, mon_analyzer, "Передаёт данные")
+Rel(mon_analyzer, mon_alert, "Генерирует алерты")
+Rel(mon_collector, mon_repo, "Читает/пишет")
+Rel(mon_analyzer, mon_repo, "Читает/пишет")
+Rel(mon_repo, monitoring_db, "CRUD", "JDBC")
+
+Rel(dev_api, dev_controller, "Использует")
+Rel(dev_api, dev_registry, "Использует")
+Rel(dev_controller, dev_repo, "Читает/пишет")
+Rel(dev_registry, dev_repo, "Читает/пишет")
+Rel(dev_repo, devices_db, "CRUD", "JDBC")
+
+Rel(async_api, event_processor, "Использует")
+Rel(async_api, trigger_engine, "Использует")
+Rel(event_processor, event_queue, "Публикует/читает")
+Rel(trigger_engine, event_queue, "Публикует/читает")
+Rel(event_processor, async_repo, "Читает/пишет")
+Rel(trigger_engine, async_repo, "Читает/пишет")
+Rel(async_repo, async_db, "CRUD", "JDBC")
+
+Rel(mon_alert, async_api, "Отправляет события", "REST")
+Rel(user_api, bill_api, "Управляет услугами", "REST")
+Rel(event_processor, dev_api, "Управляет устройствами", "REST")
+
+Rel(mon_collector, temp_sensors, "Снимает показания", "REST")
+Rel(dev_controller, heating_ctrl, "Управляет реле", "REST")
+Rel(dev_controller, temp_sensors, "Управляет датчиками", "REST")
 
 @enduml
