@@ -46,7 +46,7 @@
 ### 5. Визуализация контекста системы — диаграмма С4
 
 ```markdown
-[Контекст системы "Теплый дом"](тут будет ссылка на 01_monolitic_app_warmhouse.png)
+[Контекст системы "Теплый дом"](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/01_c4_context_monolitic_app_warmhouse.png)
 ```
 
 # Задание 2. Проектирование микросервисной архитектуры
@@ -56,26 +56,37 @@
 **Диаграмма Контекста (Context) TO-BE**
 
 ```markdown
-[Контекст системы "Теплый дом"](тут будет ссылка на 02_c4_context_microservices_app_warmhouse.png)
+[Контекст системы "Теплый дом"](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/01_c4_context_monolitic_app_warmhouse.png)
 ```
 
 **Диаграмма контейнеров (Containers)**
 
 ```markdown
-[Контекст системы "Теплый дом"](тут будет ссылка на 02_c4_containers_microservices_app_warmhouse.png)
+[Диаграмма контейнеров системы "Теплый дом"](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/02_c4_containers_microservices_app_warmhouse.png)
 ```
 
 **Диаграмма компонентов (Components)**
 
-Добавьте диаграмму для каждого из выделенных микросервисов.
+
+```markdown
+[Диаграмма компонентов системы "Теплый дом"](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/02_c4_components_microservices_app_warmhouse.png)
+```
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+```markdown
+[Диаграмма кода системы "Теплый дом"](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/02_c4_code_microservices_app_warmhouse.png)
+```
 
 # Задание 3. Разработка ER-диаграммы
 
-Добавьте сюда ER-диаграмму. Она должна отражать ключевые сущности системы, их атрибуты и тип связей между ними.
+```markdown
+[Схема БД сервиса асинхронной обработки](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/03_er_async.png)
+[Схема БД сервиса биллинга](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/03_er_billing.png)
+[Схема БД сервиса управления устройствами](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/03_er_diagram_devices.png)
+[Схема БД сервиса упр пользователями](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/03_er_diagram_users.png)
+[Схема БД сервиса мониторинга датчиков](https://github.com/aleksey6150-2/architecture-pro-warmhouse/blob/warmhouse/schemas/png/03_er_monitoring.png)
+```
 
 # Задание 4. Создание и документирование API
 
