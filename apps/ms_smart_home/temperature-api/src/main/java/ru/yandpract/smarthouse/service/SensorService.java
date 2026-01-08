@@ -18,7 +18,7 @@ public class SensorService {
 
         float randomFloat = min + generator.nextFloat() * (max - min);
         return new SensorResponse(
-                1, "Test sensor", "temp sensor", location, randomFloat, "'C", "active",
+                1, "Test sensor", "temp sensor", location, randomFloat, "celcius", "active",
                 LocalDateTime.now(),
                 LocalDateTime.of(2026, 1, 1, 1, 1)
         );
