@@ -15,10 +15,10 @@ public class TelemetryClient {
         this.restClient = builder.baseUrl(telemetryUrl).build();
     }
 
-    public TelemetryReadingDto getData() {
+    public TelemetryReadingDto getData(String location) {
 
         return this.restClient.get()
-                .uri("/temperature")
+                .uri("/api/v1/sensors/temperature/" + location)
                 .retrieve()
                 .body(TelemetryReadingDto.class);
 

@@ -10,7 +10,7 @@ spring:
 
 telemetry:
   sensor:
-    url: ${TEMPERATURE_API_URL:http://localhost:8081}
+    url: ${SMARTHOUSE_API_URL:http://localhost:8080}
 
 server:
   port: 8082

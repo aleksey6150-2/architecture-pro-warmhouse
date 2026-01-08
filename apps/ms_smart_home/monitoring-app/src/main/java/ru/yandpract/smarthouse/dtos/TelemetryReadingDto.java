@@ -23,7 +23,9 @@ public class TelemetryReadingDto {
 
     private String status;
 
-    private LocalDateTime last_updated;
+    private LocalDateTime timestamp;
 
-    private LocalDateTime created_at;
+    private String sensor_id;
+    private String sensor_type;
+    private String description;
 }

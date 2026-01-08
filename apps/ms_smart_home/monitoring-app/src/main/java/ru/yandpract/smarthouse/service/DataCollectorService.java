@@ -27,7 +27,7 @@ public class DataCollectorService {
     @Transactional
     public void loadTelemetry() {
 
-        TelemetryReadingDto dto = telemetryClient.getData();
+        TelemetryReadingDto dto = telemetryClient.getData("1");
 
         TelemetryReadingEntity entity = new TelemetryReadingEntity();
 
