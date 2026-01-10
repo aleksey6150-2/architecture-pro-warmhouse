@@ -23,4 +23,16 @@ public class SensorService {
                 LocalDateTime.of(2026, 1, 1, 1, 1)
         );
     }
+
+    public SensorResponse getTemperatureBySensor(String sensorId) {
+        float min = -10.0f;
+        float max = 30.0f;
+
+        float randomFloat = min + generator.nextFloat() * (max - min);
+        return new SensorResponse(
+                1, "Test sensor", "temp sensor", "", randomFloat, "celcius", "active",
+                LocalDateTime.now(),
+                LocalDateTime.of(2026, 1, 1, 1, 1)
+        );
+    }
 }
