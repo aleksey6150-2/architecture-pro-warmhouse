@@ -4,10 +4,30 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: smarthome-postgres
-  ## тут нужно добавить настройки
+    ## тут нужно добавить настройки
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_PASS:-postgres} -d ${DB_NAME:-smarthome}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - smarthome-network
 
   temperature-api:
-  ## тут нужно добавить приложение
+    build: ms_smart_home/temperature-api/.
+    container_name: temperature-api
+    ports:
+      - "8081:8081"
+    networks:
+      - smarthome-network
 
   app:
     build:
@@ -28,6 +48,22 @@ services:
     networks:
       - smarthome-network
 
+  telemetry-app:
+    build: ms_smart_home/monitoring-app/.
+    container_name: monitoring-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_JDBC_URL=jdbc:postgresql://postgres:5432/telemetry
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_JDBC_PASSWORD=postgres
+      - SMARTHOUSE_API_URL=http://app:8080
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
 volumes:
   postgres_data:
 

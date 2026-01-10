@@ -21,3 +21,21 @@ CREATE TABLE IF NOT EXISTS sensors (
 CREATE INDEX IF NOT EXISTS idx_sensors_type ON sensors(type);
 CREATE INDEX IF NOT EXISTS idx_sensors_location ON sensors(location);
 CREATE INDEX IF NOT EXISTS idx_sensors_status ON sensors(status);
+
+
+CREATE DATABASE telemetry;
+
+-- Connect to the database
+\c telemetry;
+
+CREATE TABLE IF NOT EXISTS temperature_readings (
+    reading_id UUID PRIMARY KEY,
+    device_id UUID,
+    home_id UUID,
+    room_id UUID,
+    temperature DECIMAL(5,2),
+    unit VARCHAR(100) NOT NULL,
+    humidity DECIMAL(5,2),
+    recorded_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    received_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    );

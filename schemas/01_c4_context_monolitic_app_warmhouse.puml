@@ -1,0 +1,21 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Диаграмма контекста монолитной системы "Тёплый дом"
+
+Person(owner, "Владелец дома", "Владелец дома, управляющий отоплением")
+Person(worker, "Специалист по подключению", "Технический специалист, подключающий датчики")
+
+System(warm_house_server, "Монолитная система «Тёплый дом»")
+
+System_Ext(heating_controller, "Контроллеры отопления", "Реле управления (вкл и выкл) отоплением")
+System_Ext(temperature_sensors, "Датчики", "Датчики для измерения температуры в домах")
+
+Rel(owner, warm_house_server, "Управляет отоплением, просматривает температуру", "rest")
+Rel(worker, warm_house_server, "Устанавливает датчики и заводит их в системе", "REST")
+
+
+Rel(warm_house_server, heating_controller, "Управление отоплением", "rest")
+Rel(warm_house_server, temperature_sensors, "Управление датчиками, просмотр показаний", "rest")
+
+@enduml

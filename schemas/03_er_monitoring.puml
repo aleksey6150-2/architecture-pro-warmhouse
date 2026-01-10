@@ -1,0 +1,48 @@
+@startuml
+title ER-диаграмма: База данных мониторинга (monitoring_db)
+
+skinparam linetype ortho
+
+entity "temperature_readings" as readings {
+    * reading_id : UUID <<PK>>
+    --
+    * device_id : UUID
+    * home_id : UUID
+    * room_id : UUID
+    * temperature : DECIMAL(5,2)
+    * unit : ENUM('celsius', 'fahrenheit')
+    humidity : DECIMAL(5,2)
+    * recorded_at : TIMESTAMP
+    * received_at : TIMESTAMP
+}
+
+entity "device_status_log" as status_log {
+    * log_id : UUID <<PK>>
+    --
+    * device_id : UUID
+    * status : ENUM('online', 'offline', 'error')
+    * previous_status : ENUM('online', 'offline', 'error')
+    error_code : VARCHAR(50)
+    error_message : TEXT
+    * changed_at : TIMESTAMP
+}
+
+entity "alert_rules" as alert_rules {
+    * rule_id : UUID <<PK>>
+    --
+    * home_id : UUID
+    room_id : UUID
+    device_id : UUID
+    * rule_type : ENUM('temp_above', 'temp_below', 'offline_duration')
+    * threshold_value : DECIMAL(10,2)
+    * severity : ENUM('info', 'warning', 'critical')
+    * is_enabled : BOOLEAN
+    * created_at : TIMESTAMP
+}
+
+note bottom of readings
+  Партиционирование по времени
+  для оптимизации производительности
+end note
+
+@enduml

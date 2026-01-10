@@ -1,0 +1,101 @@
+@startuml
+title ER-диаграмма: База данных асинхронной обработки (async_db)
+
+skinparam linetype ortho
+
+entity "t_event_triggers" as triggers {
+    * trigger_id : UUID <<PK>>
+    --
+    * home_id : UUID
+    * name : VARCHAR(255)
+    * trigger_type : ENUM('temperature', 'schedule', 'device_status', 'manual')
+    * is_enabled : BOOLEAN
+    * priority : INT
+    * created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+    created_by : UUID
+}
+
+entity "t_trigger_conditions" as conditions {
+    * condition_id : UUID <<PK>>
+    --
+    * trigger_id : UUID <<FK>>
+    * source_device_id : UUID
+    * condition_type : ENUM('temp_above', 'temp_below', 'equals', 'device_offline')
+    * operator : ENUM('gt', 'lt', 'eq', 'gte', 'lte')
+    * threshold_value : VARCHAR(100)
+    * logical_operator : ENUM('AND', 'OR')
+    condition_order : INT
+}
+
+entity "t_trigger_actions" as actions {
+    * action_id : UUID <<PK>>
+    --
+    * trigger_id : UUID <<FK>>
+    * target_device_id : UUID
+    * action_type : ENUM('turn_on', 'turn_off', 'set_temperature', 'send_notification')
+    * parameters : JSONB
+    * action_order : INT
+    delay_seconds : INT
+}
+
+entity "t_scheduled_tasks" as scheduled {
+    * task_id : UUID <<PK>>
+    --
+    * trigger_id : UUID <<FK>>
+    * schedule_type : ENUM('once', 'daily', 'weekly', 'cron')
+    cron_expression : VARCHAR(100)
+    * next_run_at : TIMESTAMP
+    last_run_at : TIMESTAMP
+    * timezone : VARCHAR(50)
+}
+
+entity "t_event_log" as event_log {
+    * event_id : UUID <<PK>>
+    --
+    * trigger_id : UUID <<FK>>
+    * event_type : ENUM('triggered', 'condition_met', 'action_executed', 'error')
+    * source_event : JSONB
+    * status : ENUM('pending', 'processing', 'completed', 'failed')
+    error_message : TEXT
+    * created_at : TIMESTAMP
+    processed_at : TIMESTAMP
+}
+
+entity "t_action_execution_log" as exec_log {
+    * execution_id : UUID <<PK>>
+    --
+    * event_id : UUID <<FK>>
+    * action_id : UUID <<FK>>
+    * target_device_id : UUID
+    * command_sent : JSONB
+    * result : ENUM('success', 'failed', 'timeout')
+    response : JSONB
+    * executed_at : TIMESTAMP
+    duration_ms : INT
+}
+
+entity "t_notification_queue" as notifications {
+    * notification_id : UUID <<PK>>
+    --
+    * user_id : UUID
+    * home_id : UUID
+    event_id : UUID <<FK>>
+    * channel : ENUM('push', 'email', 'sms')
+    * title : VARCHAR(255)
+    * message : TEXT
+    * status : ENUM('pending', 'sent', 'failed')
+    * created_at : TIMESTAMP
+    sent_at : TIMESTAMP
+    retry_count : INT
+}
+
+triggers ||--o{ conditions : "имеет условия"
+triggers ||--o{ actions : "выполняет"
+triggers ||--o| scheduled : "по расписанию"
+triggers ||--o{ event_log : "логирует"
+event_log ||--o{ exec_log : "детализация"
+event_log ||--o{ notifications : "уведомляет"
+actions ||--o{ exec_log : "выполнялось"
+
+@enduml

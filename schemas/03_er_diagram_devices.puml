@@ -1,0 +1,59 @@
+@startuml
+title ER-диаграмма: База данных устройств (devices_db)
+
+skinparam linetype ortho
+
+entity "t_devices" as devices {
+    * device_id : UUID <<PK>>
+    --
+    * home_id : UUID
+    * room_id : UUID <<FK>>
+    * device_type : ENUM('temperature_sensor', 'heating_relay')
+    * serial_number : VARCHAR(100) <<UNIQUE>>
+    * name : VARCHAR(255)
+    * model : VARCHAR(100)
+    firmware_version : VARCHAR(50)
+    * status : ENUM('online', 'offline', 'error', 'maintenance')
+    * is_enabled : BOOLEAN
+    ip_address : VARCHAR(45)
+    mac_address : VARCHAR(17)
+    * last_seen_at : TIMESTAMP
+    * created_at : TIMESTAMP
+}
+
+entity "t_rooms" as rooms {
+    * room_id : UUID <<PK>>
+    --
+    * home_id : UUID
+    * name : VARCHAR(100)
+    floor : INT
+    area_sqm : DECIMAL(6,2)
+    * created_at : TIMESTAMP
+}
+
+entity "t_temperature_sensors" as temp_sensors {
+    * sensor_id : UUID <<PK>>
+    --
+    * device_id : UUID <<FK>> <<UNIQUE>>
+    * measurement_interval_sec : INT
+    accuracy : DECIMAL(3,2)
+    min_temp : DECIMAL(5,2)
+    max_temp : DECIMAL(5,2)
+}
+
+entity "t_heating_relays" as relays {
+    * relay_id : UUID <<PK>>
+    --
+    * device_id : UUID <<FK>> <<UNIQUE>>
+    * current_state : ENUM('on', 'off')
+    * max_power_watt : INT
+    linked_sensor_id : UUID <<FK>>
+    last_state_change : TIMESTAMP
+}
+
+rooms ||--o{ devices : "содержит"
+devices ||--o| temp_sensors : "является"
+devices ||--o| relays : "является"
+temp_sensors |o--o{ relays : "связан с"
+
+@enduml

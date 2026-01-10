@@ -1,0 +1,74 @@
+@startuml
+title ER-диаграмма: База данных биллинга (billing_db)
+
+skinparam linetype ortho
+
+entity "t_accounts" as accounts {
+    * personal_acc_id : int <<PK>>
+    --
+    * user_id : UUID
+    * ammount_cent : BIGINT
+    * VERSION : INT
+    updated_at : TIMESTAMP
+}
+
+entity "t_tariffs" as tariffs {
+    * tariff_id : UUID <<PK>>
+    --
+    * name : VARCHAR(100)
+    * description : TEXT
+    * price_monthly : DECIMAL(10,2)
+    * max_devices : INT
+    * max_homes : INT
+    features : JSONB
+    * is_active : BOOLEAN
+    * created_at : TIMESTAMP
+}
+
+entity "t_subscriptions" as subscriptions {
+    * subscription_id : UUID <<PK>>
+    --
+    * account_id : UUID <<FK>>
+    * tariff_id : UUID <<FK>>
+    * home_id : UUID
+    * status : ENUM('active', 'paused', 'cancelled', 'expired')
+    * started_at : TIMESTAMP
+    * expires_at : TIMESTAMP
+    auto_renew : BOOLEAN
+}
+
+entity "t_payments" as payments {
+    * payment_id : UUID <<PK>>
+    --
+    * account_id : UUID <<FK>>
+    subscription_id : UUID <<FK>>
+    * amount : DECIMAL(10,2)
+    * currency : VARCHAR(3)
+    * payment_method : ENUM('card', 'bank_transfer', 'wallet')
+    * status : ENUM('pending', 'completed', 'failed', 'refunded')
+    external_payment_id : VARCHAR(255)
+    * created_at : TIMESTAMP
+    completed_at : TIMESTAMP
+}
+
+entity "t_invoices" as invoices {
+    * invoice_id : UUID <<PK>>
+    --
+    * account_id : UUID <<FK>>
+    * subscription_id : UUID <<FK>>
+    payment_id : UUID <<FK>>
+    * amount : DECIMAL(10,2)
+    * status : ENUM('draft', 'sent', 'paid', 'overdue')
+    * invoice_date : DATE
+    * due_date : DATE
+    pdf_url : VARCHAR(500)
+}
+
+accounts ||--o{ subscriptions : "имеет"
+accounts ||--o{ payments : "совершает"
+accounts ||--o{ invoices : "получает"
+tariffs ||--o{ subscriptions : "применяется"
+subscriptions ||--o{ invoices : "выставлен за"
+payments |o--o| invoices : "оплачивает"
+
+@enduml
